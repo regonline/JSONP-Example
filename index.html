@@ -1,0 +1,102 @@
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>JSONP Test Page</title>
+    <style type="text/css"> 
+        body,html
+        {
+            font-family:Helvetica,Arial,Tahoma;
+            color:#333;
+            padding:10px;
+        }
+        
+        a, a:visited, a:link, a:hover {color:#003E7E;}
+        
+        #results 
+        {
+            border:solid 1px #999;
+            border-radius:5px;
+            box-shadow:5px 5px 5px #ccc;
+            display:none;
+            padding:10px;
+            background-color:#efefef;
+        }
+        #results h3
+        {
+            margin:3px 0px;
+        }
+    </style>
+</head>
+<body>
+
+    <h2>JSONP Test Page</h2>
+
+    <p>This is a sample page that illustrates making a JSON ajax call to the RegOnline API going across domains.</p>
+
+    <p>
+        <a id="action" href="#">Call the GetPublicEvents API method</a>
+    </p>
+
+    <div id="results">
+        <h3>Results</h3>
+    </div>
+
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.6.1/jquery.min.js" type="text/javascript"></script>
+    <script type="text/javascript">
+
+        var apiToken;
+        $(function () {
+            $('a#action').click(function () {
+                if (!apiToken) {
+                    // no API token, login first
+                    $.ajax(
+                    {
+                        url: 'https://www.regonline.com/webservices/default.asmx/Login',
+                        dataType: 'jsonp',
+                        data:
+                        {
+                            username: JSON.stringify('USERNAME'),
+                            password: JSON.stringify('PASSWORD')
+                        },
+                        success: function (response) {
+                            if (response.d.Data.Success) {
+                                apiToken = response.d.Data.APIToken;
+                                GetPublicEvents();
+                            }
+                        }
+                    });
+                }
+                else {
+                    GetPublicEvents();
+                }
+            });
+        });
+
+        function GetPublicEvents() {
+            if (!apiToken) return;
+
+            $.ajax(
+            {
+                url: 'https://www.regonline.com/webservices/default.asmx/GetPublicEvents',
+                dataType: 'jsonp',
+                data:
+                {
+                    filter: JSON.stringify(''),
+                    orderBy: JSON.stringify(''),
+                    APIToken: encodeURI(apiToken)
+                },
+                success: function (response) {
+                    if (response.d.Success) {
+                        for (var i = 0; i < response.d.Data.length; i++) {
+                            var e = response.d.Data[i];
+                            var startDate = new Date(parseInt(e.StartDate.replace(/[^\d]/g, '')));
+                            $('div#results').append("<div><a target='_blank' href='https://www.regonline.com/" + e.ID + "'>" + e.Title + '</a> - ' + startDate + '</div>');
+                            $('div#results').show();
+                        }
+                    }
+                    else alert(response.d.Message);
+                }
+            });
+        }
+    </script>
+</body>
+</html>
