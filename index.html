@@ -88,7 +88,7 @@
                     if (response.d.Success) {
                         for (var i = 0; i < response.d.Data.length; i++) {
                             var e = response.d.Data[i];
-                            var startDate = new Date(parseInt(e.StartDate.replace(/[^\d]/g, '')));
+                            var startDate = e.StartDate ? new Date(parseInt(e.StartDate.replace(/[^\d]/g, ''))) : '';
                             $('div#results').append("<div><a target='_blank' href='https://www.regonline.com/" + e.ID + "'>" + e.Title + '</a> - ' + startDate + '</div>');
                             $('div#results').show();
                         }
