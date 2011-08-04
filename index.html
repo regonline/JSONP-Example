@@ -54,8 +54,8 @@
                         dataType: 'jsonp',
                         data:
                         {
-                            username: JSON.stringify('USERNAME'),
-                            password: JSON.stringify('PASSWORD')
+                            username: JSON.stringify('<USERNAME>'),
+                            password: JSON.stringify('<PASSWORD>')
                         },
                         success: function (response) {
                             if (response.d.Data.Success) {
@@ -86,6 +86,7 @@
                 },
                 success: function (response) {
                     if (response.d.Success) {
+                        
                         for (var i = 0; i < response.d.Data.length; i++) {
                             var e = response.d.Data[i];
                             var startDate = e.StartDate ? new Date(parseInt(e.StartDate.replace(/[^\d]/g, ''))) : '';
@@ -98,5 +99,6 @@
             });
         }
     </script>
+    
 </body>
 </html>
