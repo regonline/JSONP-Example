@@ -1,0 +1,129 @@
+﻿<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>JSONP Test Page</title>
+    <style type="text/css"> 
+        body,html
+        {
+            font-family:Helvetica,Arial,Tahoma;
+            color:#333;
+            padding:10px;
+        }
+
+    </style>
+</head>
+<body>
+
+    <h2>JSONP Test Page</h2>
+
+    <p>This is a sample page that illustrates making a JSON ajax call to the RegOnline API going across domains.</p>
+
+    <p>
+        <a id="action" href="#">Call the UpdateCustomFieldResponsesForRegistration API method</a>
+    </p>
+
+    <div id="results">
+        <h3>Results</h3>
+    </div>
+
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.6.1/jquery.min.js" type="text/javascript"></script>
+    <script type="text/javascript">
+
+        var apiToken;
+        var eventID = '<EVENTID>'; // Update with your event ID
+        var registrationID = '<REGISTRATION ID>'; // Update with the registration ID you wish to update a response for
+
+        $(function () {
+            $('a#action').click(function () {
+                if (!apiToken) {
+                    // no API token, login first
+                    $.ajax(
+                    {
+                        url: 'https://www.regonline.com/api/default.asmx/Login',
+                        dataType: 'jsonp',
+                        data:
+                        {
+                            username: JSON.stringify('<USERNAME>'), // Update with your username
+                            password: JSON.stringify('<PASSWORD>') // Update with your password
+                        },
+                        success: function (response) {
+                            if (response.d.Data.Success) {
+                                apiToken = response.d.Data.APIToken;
+                                initCustomFieldResponseUpdate();
+                            }
+                        }
+                    });
+                }
+                else {
+                    initCustomFieldResponseUpdate();
+                }
+            });
+        });
+
+
+        function initCustomFieldResponseUpdate() {
+            if (!apiToken) return;
+
+            $.ajax(
+            {
+                url: 'https://www.regonline.com/api/default.asmx/GetCustomFieldResponsesForRegistration',
+                dataType: 'jsonp',
+                data:
+                {
+                    eventID: JSON.stringify(eventID),
+                    registrationID: JSON.stringify(registrationID),
+                    pageSectionID: JSON.stringify('0'), //Agenda Items
+                    orderBy: JSON.stringify(''),
+                    APIToken: encodeURI(apiToken)
+                },
+                success: function (response) {
+                    if (response.d.Success) {
+                        // update returned responses
+                        UpdateCustomFieldResponsesForRegistration(response.d.Data);
+                    }
+                    else alert(response.d.Message);
+                }
+            });
+        }
+
+
+        function UpdateCustomFieldResponsesForRegistration(responsesToUpdate) {
+            if (!apiToken || !responsesToUpdate) return;
+
+            // it is possible to use the responses from GetCustomFieldResponsesForRegistration 
+            // or simply build a response to pass into UpdateCustomFieldResponsesForRegistration
+            responsesToUpdate[0].Response = '<NEW RESPONSE>';
+
+            var responseToUpdate = { 
+                "EventID": responsesToUpdate[0].EventID
+                , "CFID": responsesToUpdate[0].CFID
+                , "PageSectionID": responsesToUpdate[0].PageSectionID
+                , "RegistrationID": responsesToUpdate[0].RegistrationID
+                , "Response": responsesToUpdate[0].Response
+            };
+
+            // in this example, build an array of responses from scratch and pass it to the API
+            var cfr = JSON.stringify([responseToUpdate]);
+
+            $.ajax(
+            {
+                url: 'https://www.regonline.com/api/default.asmx/UpdateCustomFieldResponsesForRegistration',
+                dataType: 'jsonp',
+                data:
+                {
+                    eventID: JSON.stringify(eventID),
+                    registrationID: JSON.stringify(registrationID),
+                    customFieldResponses: cfr,
+                    APIToken: encodeURI(apiToken)
+                },
+                success: function (response) {
+                    if (response.d.Success) {
+                        $('div#results').append("Successfully update response(s): " + cfr);
+                        $('div#results').show();
+                    }
+                    else alert(response.d.Message);
+                }
+            });
+        }
+    </script>    
+</body>
+</html>

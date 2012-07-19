@@ -50,7 +50,7 @@
                     // no API token, login first
                     $.ajax(
                     {
-                        url: 'https://www.regonline.com/webservices/default.asmx/Login',
+                        url: 'https://www.regonline.com/api/default.asmx/Login',
                         dataType: 'jsonp',
                         data:
                         {
@@ -76,7 +76,7 @@
 
             $.ajax(
             {
-                url: 'https://www.regonline.com/webservices/default.asmx/GetPublicEvents',
+                url: 'https://www.regonline.com/api/default.asmx/GetPublicEvents',
                 dataType: 'jsonp',
                 data:
                 {
